@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Surat Gym Finder</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+    }
+    #sidebar {
+      width: 300px;
+      background: #f7f7f7;
+      padding: 10px;
+      overflow-y: auto;
+      border-right: 1px solid #ccc;
+    }
+    #map {
+      flex: 1;
+    }
+    .gym-item {
+      padding: 8px;
+      margin-bottom: 8px;
+      background: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+      border: 1px solid #ddd;
+    }
+    .gym-item:hover {
+      background: #e6f0ff;
+    }
+    select {
+      width: 100%;
+      padding: 6px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <h3>Nearby Gyms</h3>
+  <label for="radius">Search Radius:</label>
+<select id="radius">
+  <option value="20000">20 km</option>
+  <option value="50000">50 km</option>
+  <option value="100000" selected>100 km</option>
+</select>
+  <div id="gym-list">Loading...</div>
+</div>
+
+<div id="map"></div>
+
+<script>
+  // Replace with your tokens
+  mapboxgl.accessToken = 'pk.eyJ1IjoiY2hhbmRhbjc4NjkiLCJhIjoiY205ZTEydHRzMTB6czJqcXF0Y3FqdjhobCJ9.IsomfHDs5gZvnDemzgN38g';
+  const foursquareApiKey = 'fsq3XJXZKonj5s2ANOVO7Qdx3uBk12HVE6VUnY0PGlpcQuA=';
+
+  let map;
+  let userCoords;
+  let currentMarkers = [];
+
+  function initMap(centerCoords) {
+    map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/streets-v12',
+      center: centerCoords,
+      zoom: 13
+    });
+
+    window.addEventListener("resize", () => {
+  map.resize();
+});
+
+
+    new mapboxgl.Marker({ color: 'blue' })
+      .setLngLat(centerCoords)
+      .setPopup(new mapboxgl.Popup().setText('You are here'))
+      .addTo(map);
+
+    userCoords = centerCoords;
+    fetchGyms(centerCoords, parseInt(document.getElementById("radius").value));
+
+    document.getElementById("radius").addEventListener("change", () => {
+      fetchGyms(centerCoords, parseInt(document.getElementById("radius").value));
+    });
+  }
+
+  function fetchGyms(center, radius) {
+    clearMarkers();
+    document.getElementById("gym-list").innerHTML = "Searching...";
+
+    const url = `https://api.foursquare.com/v3/places/search?query=gym&ll=${center[1]},${center[0]}&radius=${radius}&limit=30`;
+
+    fetch(url, {
+      headers: {
+        Accept: 'application/json',
+        Authorization: foursquareApiKey
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById("gym-list");
+      list.innerHTML = "";
+
+      if (!data.results || !data.results.length) {
+        list.innerHTML = "<p>No gyms found.</p>";
+        return;
+      }
+
+      data.results.forEach(place => {
+        const coords = [
+          place.geocodes.main.longitude,
+          place.geocodes.main.latitude
+        ];
+
+        const marker = new mapboxgl.Marker()
+          .setLngLat(coords)
+          .setPopup(new mapboxgl.Popup().setText(place.name))
+          .addTo(map);
+
+        const div = document.createElement("div");
+        div.className = "gym-item";
+        div.innerHTML = `<strong>${place.name}</strong><br><small>${place.location.formatted_address || ''}</small>`;
+
+        div.onclick = () => {
+          map.flyTo({ center: coords, zoom: 16 });
+          marker.togglePopup();
+        };
+
+        list.appendChild(div);
+        currentMarkers.push(marker);
+      });
+    })
+    .catch(err => {
+      document.getElementById("gym-list").innerHTML = "<p>Error fetching gyms.</p>";
+      console.error(err);
+    });
+  }
+
+  function clearMarkers() {
+    currentMarkers.forEach(marker => marker.remove());
+    currentMarkers = [];
+  }
+
+  // Try geolocation, fallback to Surat
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      initMap([pos.coords.longitude, pos.coords.latitude]);
+    },
+    () => {
+      console.warn("Using default location: Surat");
+      initMap([72.8311, 21.1702]); // Surat
+    }
+  );
+
+
+
+  function getDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371e3; // metres
+  const φ1 = lat1 * Math.PI/180;
+  const φ2 = lat2 * Math.PI/180;
+  const Δφ = (lat2 - lat1) * Math.PI/180;
+  const Δλ = (lon2 - lon1) * Math.PI/180;
+
+  const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ/2) * Math.sin(Δλ/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+  const d = R * c;
+  return (d / 1000).toFixed(1); // km
+}
+
+const distance = getDistance(userCoords[1], userCoords[0], coords[1], coords[0]);
+div.innerHTML = `<strong>${place.name}</strong><br><small>${distance} km away</small>`;
+
+</script>
+
+</body>
+</html>

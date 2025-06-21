@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Progress Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        /* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7fb;
+    color: #333;
+    line-height: 1.6;
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+}
+
+.container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 900px;
+    text-align: center;
+    margin: 20px;
+}
+
+h1 {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+h1 i {
+    margin-right: 10px;
+}
+
+h2 {
+    font-size: 2rem;
+    color: #333;
+    margin-top: 30px;
+    font-weight: 600;
+}
+
+h2 i {
+    margin-right: 10px;
+}
+
+h3 {
+    font-size: 1.4rem;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+/* Form Styles */
+form {
+    margin-bottom: 30px;
+}
+
+.exercise {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.exercise select,
+.exercise input {
+    font-size: 1rem;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.exercise select {
+    background-color: #fff;
+    color: #333;
+}
+
+button {
+    padding: 12px 25px;
+    font-size: 1rem;
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button[type="submit"] {
+    background-color: #007BFF;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Analytics and Streak Section */
+#analytics {
+    margin-top: 40px;
+}
+
+#personal-bests,
+#workout-stats,
+#streak {
+    background-color: #f4f7fb;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+}
+
+#personal-bests ul,
+#workout-stats ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#personal-bests li {
+    font-size: 1.1rem;
+    padding: 5px 0;
+}
+
+#workout-stats p {
+    font-size: 1.1rem;
+    margin: 10px 0;
+}
+
+#streak {
+    font-size: 1.5rem;
+    color: #FF6B6B;
+}
+
+#streak i {
+    margin-right: 10px;
+}
+
+/* Chart Styling */
+canvas {
+    max-width: 100%;
+    height: 350px;
+    margin-top: 30px;
+}
+
+/* Export CSV Button */
+#export-csv {
+    margin-top: 30px;
+    padding: 12px 25px;
+    background-color: #FFC107;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#export-csv:hover {
+    background-color: #FF8F00;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .exercise select,
+    .exercise input {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+
+    button,
+    #export-csv {
+        font-size: 0.9rem;
+        padding: 10px 20px;
+    }
+
+    #analytics {
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    .exercise select,
+    .exercise input {
+        font-size: 0.8rem;
+        padding: 6px;
+    }
+
+    button,
+    #export-csv {
+        font-size: 0.8rem;
+        padding: 8px 15px;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-dumbbell"></i> Gym Progress Tracker</h1>
+
+        <!-- Exercise Form -->
+        <form id="exercise-form">
+            <div id="exercises"></div>
+            <button type="button" onclick="addExercise()"><i class="fas fa-plus-circle"></i> Add Exercise</button>
+            <button type="submit"><i class="fas fa-save"></i> Save Progress</button>
+        </form>
+
+        <!-- Analytics Section -->
+        <div id="analytics">
+            <div id="personal-bests"></div>
+            <div id="workout-stats"></div>
+            <div id="streak"></div>
+        </div>
+
+        <!-- Chart Section -->
+        <h2><i class="fas fa-chart-line"></i> Progress Chart</h2>
+        <canvas id="progressChart" width="400" height="200"></canvas>
+
+        <!-- Export CSV -->
+        <button id="export-csv"><i class="fas fa-file-export"></i> Export to CSV</button>
+    </div>
+
+    <script>
+        const userId = "user123";
+let cachedProgress = null;
+
+// Prevent negative values
+document.querySelectorAll('input[type="number"]').forEach(input => {
+  input.addEventListener('change', (e) => {
+    if (e.target.value < 0) e.target.value = 0;
+  });
+});
+
+// Exercise Form Submission
+document.getElementById("exercise-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const entries = document.querySelectorAll(".exercise");
+  const exercises = [];
+  
+  entries.forEach((entry) => {
+    const name = entry.querySelector("select").value;
+    const [sets, reps, weight] = entry.querySelectorAll("input");
+    exercises.push({
+      name,
+      sets: Number(sets.value),
+      reps: Number(reps.value),
+      weight: Number(weight.value),
+    });
+  });
+
+  try {
+    await fetch("/api/progress", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, date: new Date(), exercises }),
+    });
+    alert("Progress saved!");
+    cachedProgress = null; // Clear cache to force refresh
+    fetchAndRenderBarChart();
+    updateAnalytics();
+  } catch (err) {
+    alert("Failed to save progress");
+  }
+});
+
+// Add Exercise to Form
+function addExercise() {
+  const container = document.getElementById("exercises");
+  const div = document.createElement("div");
+  div.className = "exercise";
+  div.innerHTML = `
+    <select name="name" required>
+      <option value="Squat">Squat</option>
+      <option value="Bench Press">Bench Press</option>
+      <option value="Deadlift">Deadlift</option>
+      <option value="Lunges">Lunges</option>
+      <option value="Overhead Press">Overhead Press</option>
+      <option value="Pull Ups">Pull Ups</option>
+      <option value="Push Ups">Push Ups</option>
+      <option value="Dips">Dips</option>
+      <option value="Lat Pulldown">Lat Pulldown</option>
+      <option value="Leg Press">Leg Press</option>
+      <option value="Barbell Row">Barbell Row</option>
+      <option value="Bicep Curl">Bicep Curl</option>
+      <option value="Tricep Pushdown">Tricep Pushdown</option>
+    </select>
+    <input type="number" placeholder="Sets" name="sets" min="0" required>
+    <input type="number" placeholder="Reps" name="reps" min="0" required>
+    <input type="number" placeholder="Weight (kg)" name="weight" min="0" required>
+  `;
+  container.appendChild(div);
+}
+
+// Fetch and Render Calories-Only Bar Chart
+async function fetchAndRenderBarChart() {
+  try {
+    if (!cachedProgress) {
+      const res = await fetch(`/api/progress/${userId}`);
+      cachedProgress = await res.json();
+    }
+
+    const labels = cachedProgress.map(entry => new Date(entry.date).toLocaleDateString());
+    const calories = cachedProgress.map(entry =>
+      entry.exercises.reduce((sum, ex) => sum + estimateCalories(ex), 0)
+    );
+
+    const ctx = document.getElementById("progressChart").getContext("2d");
+    if (window.chart) window.chart.destroy();
+
+    window.chart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: "Calories Burned (kcal)",
+            data: calories,
+            backgroundColor: "rgba(255, 99, 132, 0.6)",
+            borderColor: "rgba(255, 99, 132, 1)",
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true, title: { display: true, text: 'Calories Burned' } },
+          x: { title: { display: true, text: 'Date' } }
+        },
+      },
+    });
+  } catch (err) {
+    console.error("Chart error:", err);
+  }
+}
+
+// Estimate Calories Burned
+function estimateCalories(exercise) {
+  const caloriesPerKg = {
+    'Squat': 8,
+    'Bench Press': 7,
+    'Deadlift': 9,
+    'Lunges': 6,
+    'Overhead Press': 7,
+    'Pull Ups': 10,
+    'Push Ups': 5,
+    'Dips': 8,
+    'Lat Pulldown': 7,
+    'Leg Press': 8,
+    'Barbell Row': 7,
+    'Bicep Curl': 4,
+    'Tricep Pushdown': 4
+  };
+  return exercise.weight * exercise.sets * exercise.reps * (caloriesPerKg[exercise.name] || 5) / 1000;
+}
+
+// Analytics Fetching
+async function fetchAnalytics() {
+  try {
+    const res = await fetch(`/api/analytics/${userId}`);
+    const data = await res.json();
+
+    // Personal Bests
+    const bestsHTML = data.personalBests?.map(pb => 
+      `<li>${pb._id}: <strong>${pb.maxWeight}kg</strong></li>`
+    ).join('') || '<li>No records yet</li>';
+    document.getElementById('personal-bests').innerHTML = `<h3>🏆 Personal Records</h3><ul>${bestsHTML}</ul>`;
+
+    // Workout Stats
+    document.getElementById('workout-stats').innerHTML = `
+      <h3>📊 Summary</h3>
+      <p>Total Workouts: <strong>${data.totalWorkouts || 0}</strong></p>
+      <p>Avg Exercises per Workout: <strong>${data.avgPerWorkout?.toFixed(2) || 0}</strong></p>
+    `;
+  } catch (err) {
+    console.error("Analytics error:", err);
+  }
+}
+
+// Streak Fetching
+async function fetchStreak() {
+  try {
+    const res = await fetch(`/api/streak/${userId}`);
+    const data = await res.json();
+    document.getElementById('streak').innerText = `🔥 Streak: ${data.streakDays || 0} days`;
+  } catch (err) {
+    console.error("Streak error:", err);
+  }
+}
+
+// Update Analytics (combined)
+async function updateAnalytics() {
+  await fetchAnalytics();
+  await fetchStreak();
+}
+
+// Export CSV
+document.getElementById('export-csv').addEventListener('click', async () => {
+  if (!confirm("Export all workout data to CSV?")) return;
+  try {
+    const res = await fetch(`/api/progress/${userId}`);
+    const data = await res.json();
+    let csvContent = "Date,Exercise,Sets,Reps,Weight\n";
+    data.forEach(entry => {
+      entry.exercises.forEach(ex => {
+        csvContent += `${new Date(entry.date).toLocaleDateString()},${ex.name},${ex.sets},${ex.reps},${ex.weight}\n`;
+      });
+    });
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "workout_progress.csv";
+    link.click();
+  } catch (err) {
+    alert("Export failed");
+  }
+});
+
+// Initialize
+window.onload = () => {
+  fetchAndRenderBarChart();
+  updateAnalytics();
+  addExercise(); // Start with one exercise
+};
+
+    </script>
+</body>
+</html>
