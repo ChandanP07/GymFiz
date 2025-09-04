@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Dashboard | GymFiz</title>
+</head>
+
+<body>
+  <h1>Welcome, <%= user.Username %>!</h1>
+  <h2>Your Recent Progress</h2>
+  <% if (dailyProgress.length===0) { %>
+    <p>No progress reports found.</p>
+    <% } else { %>
+      <ul>
+        <% dailyProgress.forEach(report=> { %>
+          <li>
+            <strong>Date:</strong>
+            <%= new Date(report.date).toDateString() %> <br />
+              <strong>Exercises:</strong>
+              <ul>
+                <% report.exercises.forEach(ex=> { %>
+                  <li>
+                    <%= ex.name %> - <%= ex.sets %> sets × <%= ex.reps %> reps @ <%= ex.weight %>kg
+                  </li>
+                  <% }) %>
+              </ul>
+          </li>
+          <% }) %>
+      </ul>
+      <% } %>
+
+
+        <h2>Your Personal Bests</h2>
+        <canvas id="bestChart" width="400" height="200"></canvas>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+          const labels = <% - JSON.stringify(personalBests.map(pb => pb._id)) %>;
+          const data = <% - JSON.stringify(personalBests.map(pb => pb.maxWeight)) %>;
+
+          new Chart(document.getElementById('bestChart'), {
+            type: 'bar',
+            data: {
+              labels: labels,
+              datasets: [{
+                label: 'Max Weight (kg)',
+                data: data,
+                backgroundColor: 'rgba(0, 123, 255, 0.6)',
+                borderColor: 'rgba(0, 123, 255, 1)',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  title: { display: true, text: 'Weight (kg)' }
+                }
+              }
+            }
+          });
+        </script>
+
+
+</body>
+
+</html>

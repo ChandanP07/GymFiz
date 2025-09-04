@@ -4,8 +4,15 @@
   <title>Surat Gym Finder</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  
+  <!-- Mapbox Core -->
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+
+  <!-- Mapbox Directions Plugin -->
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.1/mapbox-gl-directions.css" rel="stylesheet" />
+
   <style>
     body {
       margin: 0;
@@ -46,24 +53,25 @@
 <div id="sidebar">
   <h3>Nearby Gyms</h3>
   <label for="radius">Search Radius:</label>
-<select id="radius">
-  <option value="20000">20 km</option>
-  <option value="50000">50 km</option>
-  <option value="100000" selected>100 km</option>
-</select>
+  <select id="radius">
+    <option value="20000">20 km</option>
+    <option value="50000">50 km</option>
+    <option value="100000" selected>100 km</option>
+  </select>
+  <label><input type="checkbox" id="show-distance" checked /> Show distance from user</label>
   <div id="gym-list">Loading...</div>
 </div>
 
 <div id="map"></div>
 
 <script>
-  // Replace with your tokens
   mapboxgl.accessToken = 'pk.eyJ1IjoiY2hhbmRhbjc4NjkiLCJhIjoiY205ZTEydHRzMTB6czJqcXF0Y3FqdjhobCJ9.IsomfHDs5gZvnDemzgN38g';
   const foursquareApiKey = 'fsq3XJXZKonj5s2ANOVO7Qdx3uBk12HVE6VUnY0PGlpcQuA=';
 
   let map;
   let userCoords;
   let currentMarkers = [];
+  let directions; // global
 
   function initMap(centerCoords) {
     map = new mapboxgl.Map({
@@ -73,10 +81,19 @@
       zoom: 13
     });
 
-    window.addEventListener("resize", () => {
-  map.resize();
-});
+    window.addEventListener("resize", () => map.resize());
 
+    directions = new MapboxDirections({
+      accessToken: mapboxgl.accessToken,
+      unit: 'metric',
+      profile: 'mapbox/driving',
+      controls: {
+        inputs: false,
+        instructions: true,
+        profileSwitcher: false
+      }
+    });
+    map.addControl(directions, 'top-left');
 
     new mapboxgl.Marker({ color: 'blue' })
       .setLngLat(centerCoords)
@@ -89,6 +106,21 @@
     document.getElementById("radius").addEventListener("change", () => {
       fetchGyms(centerCoords, parseInt(document.getElementById("radius").value));
     });
+  }
+
+  function getDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3;
+    const φ1 = lat1 * Math.PI / 180;
+    const φ2 = lat2 * Math.PI / 180;
+    const Δφ = (lat2 - lat1) * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c;
+    return (d / 1000).toFixed(1); // km
   }
 
   function fetchGyms(center, radius) {
@@ -126,11 +158,28 @@
 
         const div = document.createElement("div");
         div.className = "gym-item";
-        div.innerHTML = `<strong>${place.name}</strong><br><small>${place.location.formatted_address || ''}</small>`;
+        
+        const showDistance = document.getElementById("show-distance").checked;
+        const location = place.location;
+        const address = location.formatted_address ||
+          [location.address, location.locality, location.region, location.country]
+          .filter(Boolean).join(', ');
+
+        let gymHTML = `<strong>${place.name}</strong><br><small>${address}</small>`;
+
+        if (showDistance) {
+          const distance = getDistance(userCoords[1], userCoords[0], coords[1], coords[0]);
+          gymHTML += `<br><small>${distance} km away</small>`;
+        }
+
+        div.innerHTML = gymHTML;
 
         div.onclick = () => {
-          map.flyTo({ center: coords, zoom: 16 });
+          map.flyTo({ center: coords, zoom: 14 });
           marker.togglePopup();
+          directions.removeRoutes(); // clear previous
+          directions.setOrigin(userCoords);
+          directions.setDestination(coords);
         };
 
         list.appendChild(div);
@@ -148,37 +197,52 @@
     currentMarkers = [];
   }
 
-  // Try geolocation, fallback to Surat
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      initMap([pos.coords.longitude, pos.coords.latitude]);
-    },
-    () => {
-      console.warn("Using default location: Surat");
-      initMap([72.8311, 21.1702]); // Surat
+  // navigator.geolocation.getCurrentPosition(
+  //   (pos) => {
+  //     initMap([pos.coords.longitude, pos.coords.latitude]);
+  //   },
+  //   () => {
+  //     console.warn("Using default location: Surat");
+  //     initMap([72.8311, 21.1702]); // Surat fallback
+  //   }
+  // );
+
+  let userMarker;
+
+function updateUserPosition(position) {
+  const coords = [position.coords.longitude, position.coords.latitude];
+  userCoords = coords;
+
+  if (!map) {
+    initMap(coords);
+  } else {
+    if (userMarker) userMarker.setLngLat(coords);
+    else {
+      userMarker = new mapboxgl.Marker({ color: 'blue' })
+        .setLngLat(coords)
+        .setPopup(new mapboxgl.Popup().setText('You are here'))
+        .addTo(map);
     }
-  );
 
-
-
-  function getDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371e3; // metres
-  const φ1 = lat1 * Math.PI/180;
-  const φ2 = lat2 * Math.PI/180;
-  const Δφ = (lat2 - lat1) * Math.PI/180;
-  const Δλ = (lon2 - lon1) * Math.PI/180;
-
-  const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-            Math.cos(φ1) * Math.cos(φ2) *
-            Math.sin(Δλ/2) * Math.sin(Δλ/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-
-  const d = R * c;
-  return (d / 1000).toFixed(1); // km
+    map.setCenter(coords);
+  }
 }
 
-const distance = getDistance(userCoords[1], userCoords[0], coords[1], coords[0]);
-div.innerHTML = `<strong>${place.name}</strong><br><small>${distance} km away</small>`;
+function handleGeolocationError() {
+  console.warn("Using default location: Surat");
+  initMap([72.8311, 21.1702]);
+}
+
+// Start watching position
+if ("geolocation" in navigator) {
+  navigator.geolocation.watchPosition(updateUserPosition, handleGeolocationError, {
+    enableHighAccuracy: true,
+    maximumAge: 0,
+    timeout: 10000
+  });
+} else {
+  handleGeolocationError();
+}
 
 </script>
 

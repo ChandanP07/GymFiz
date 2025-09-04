@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard - Gym Tracker</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    h1, h2 {
+      color: #333;
+      margin-top: 20px;
+    }
+
+    .section {
+      background: #fff;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background: #f0f0f0;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    ul li {
+      margin-bottom: 8px;
+    }
+
+    a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .user-list td {
+      font-size: 0.95rem;
+    }
+    .container{
+      display:ruby;
+    }
+  </style>
+</head>
+<body>
+
+  <h1><i class="fas fa-user-shield"></i> Admin Dashboard</h1>
+
+  <!-- Videos Section -->
+  <div class="section">
+    <h2><i class="fas fa-video"></i> Injury & Home Exercise Videos</h2>
+    <div class="container">
+        <!-- Leg Injury Section -->
+        <section>
+            <h2>Leg Injury</h2>
+            <div class="video-grid">
+                <div class="video-card">
+                    <video controls>
+                        <source src="/images/leg1.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p>How to treat a sprained ankle.</p>
+                </div>
+                <div class="video-card">
+                    <video controls>
+                        <source src="/images/leg2.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p>Exercises for knee recovery.</p>
+                </div>
+            </div>
+        </section>
+        <!-- Back Pain Section -->
+        <section>
+            <h2>Back Pain</h2>
+            <div class="video-grid">
+                <div class="video-card">
+                    <video controls>
+                        <source src="/images/back1.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p>Simple stretches for back pain relief.</p>
+                </div>
+                <div class="video-card">
+                    <video controls>
+                        <source src="/images/back2.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p>Posture tips to avoid back pain.</p>
+                </div>
+            </div>
+        </section>
+        <!-- Shoulder Injury Section -->
+        <section>
+            <h2>Shoulder Injury</h2>
+            <div class="video-grid">
+                <div class="video-card">
+                    <video controls>
+                        <source src="/images/shoulder_ injury_ video.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p>How to recover from a rotator cuff injury.</p>
+                </div>
+                <div class="video-card">
+                    <video controls>
+                        <source src="/images/shoulder_2.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p>Best exercises for shoulder strength.</p>
+                </div>
+            </div>
+        </section>
+        <!-- Add More Sections as Needed -->
+    </div>
+    <div class="container">
+        <!-- Push-up Exercise Section -->
+        <section>
+            <h2>Push-up Exercise</h2>
+            <div class="video-grid">
+                <div class="video-card">
+                    <video controls>
+                        <source src="/images/pushup.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p>Proper form and technique for push-ups.</p>
+                </div>
+            </div>
+        </section>
+        <!-- Squats Exercise Section -->
+        <section>
+            <h2>Squats Exercise</h2>
+            <div class="video-grid">
+                <div class="video-card">
+                    <video controls>
+                        <source src="/images/squats.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p>Step-by-step guide for doing squats effectively.</p>
+                </div>
+            </div>
+        </section>
+        <!-- Plank Exercise Section -->
+        <section>
+            <h2>Plank Exercise</h2>
+            <div class="video-grid">
+                <div class="video-card">
+                    <video controls>
+                        <source src="/images/plank.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p>How to maintain proper form while doing planks.</p>
+                </div>
+            </div>
+        </section>
+        <!-- shoulder Exercise Section -->
+        <section>
+            <h2>shoulder Exercise</h2>
+            <div class="video-grid">
+                <div class="video-card">
+                    <video controls>
+                        <source src="/images/shoulder.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p>Learn the correct form for lunges to avoid injury.</p>
+                </div>
+            </div>
+        </section>
+        <!-- Leg Exercise Section -->
+        <section>
+            <h2>Leg Exercise</h2>
+            <div class="video-grid">
+                <div class="video-card">
+                    <video controls>
+                        <source src="/images/leg.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p>Leg exercises to improve strength and flexibility.</p>
+                </div>
+            </div>
+        </section>
+        <!-- Chest Exercise Section -->
+        <section>
+            <h2>Chest Exercise</h2>
+            <div class="video-grid">
+                <div class="video-card">
+                    <video controls>
+                        <source src="/images/chest.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p>Techniques for building chest strength and definition.</p>
+                </div>
+            </div>
+        </section>
+        <!-- Biceps Exercise Section -->
+        <section>
+            <h2>Biceps Exercise</h2>
+            <div class="video-grid">
+                <div class="video-card">
+                    <video controls>
+                        <source src="/images/bisceps.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p>How to tone and strengthen your biceps.</p>
+                </div>
+            </div>
+        </section>
+        <!-- Abs Exercise Section -->
+        <section>
+            <h2>Abs Exercise</h2>
+            <div class="video-grid">
+                <div class="video-card">
+                    <video controls>
+                        <source src="/images/abs.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p>Effective exercises to build core strength and abs.</p>
+                </div>
+            </div>
+        </section>
+        <!-- Add More Sections as Needed -->
+    </div>
+  </div>
+
+
+  <!-- Workouts Section -->
+  <div class="section">
+    <h2><i class="fas fa-dumbbell"></i> Workouts</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>User ID</th>
+          <th>Date</th>
+          <th>Exercises</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (workouts.length === 0) { %>
+          <tr><td colspan="3">No workout records found.</td></tr>
+        <% } else { %>
+          <% workouts.forEach(workout => { %>
+            <tr>
+              <td><%= workout.userId %></td>
+              <td><%= workout.date %></td>
+              <td>
+                <ul>
+                  <% workout.exercises.forEach(ex => { %>
+                    <li><%= ex.name %> - <%= ex.sets %>x<%= ex.reps %> @ <%= ex.weight %>kg (Volume: <%= ex.volume %>)</li>
+                  <% }) %>
+                </ul>
+              </td>
+            </tr>
+          <% }) %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+
+</body>
+</html>
